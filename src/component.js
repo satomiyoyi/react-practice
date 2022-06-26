@@ -1,3 +1,4 @@
+import {compareTwoVdom, findDom}from './react-dom';
 class Updater {
     constructor(classInstance) {
         this.classInstance = classInstance;
@@ -13,20 +14,20 @@ class Updater {
         this.updateComponent();
     }
     getState() {
-        let {classInstance, penddingStates} = this;
-        let {state} = classInstance;
-        penddingStates.forEach(item => {
-            state = {...state, ...item};
+        let { classInstance, penddingStates } = this;
+        let { state } = classInstance;
+        penddingStates.forEach((item) => {
+            state = { ...state, ...item };
         });
         penddingStates.length = 0;
         return state;
     }
     updateComponent() {
-        let {classInstance, penddingStates} = this;
+        let { classInstance, penddingStates } = this;
         // 优先判断是否存在新传入的属性 有新内容再更新
         if (penddingStates.length > 0) {
             // getState获取融合后的新属性和classInstance里的旧属性进行替换
-            this.shouldUpdate(classInstance, this.getState())
+            this.shouldUpdate(classInstance, this.getState());
         }
     }
     shouldUpdate(classInstance, newState) {
@@ -49,6 +50,11 @@ export class Component {
         this.updater.addState(partialState);
     }
     forceUpdate() {
-        console.log(this.state);
+        // 真实dom 更新需要从实例上获取到真实dom
+        let oldRenderVdom = this.oldRenderVdom;
+        let oldDom = findDom(oldRenderVdom);
+        let newRenderVdom = this.render();
+        compareTwoVdom(oldDom.parentNode, oldRenderVdom, newRenderVdom);
+        this.oldRenderVdom = newRenderVdom;
     }
 }

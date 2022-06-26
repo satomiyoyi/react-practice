@@ -57,11 +57,10 @@ function createDom(vdom) {
     else if (typeof type === 'function') {
         if (type.isReactComponent) {
             // 类组件
-            return mountClassComponent(type, props);
+            return mountClassComponent(vdom);
         }
         // 函数组件
-        return mountFunctionComponent(type, props);
-        
+        return mountFunctionComponent(vdom);
     }
     if (props) {
         updateProps(dom, props);
@@ -70,23 +69,47 @@ function createDom(vdom) {
             addChildrenDom(dom, props.children);
         }
     }
+    // 为了通过虚拟dom获取真实dom时候可以获取都所以新增dom属性
+    vdom.__proto__.dom = dom;
     return dom;
 }
-function mountFunctionComponent(fnComponent, props) {
-    let vdom = fnComponent(props);
-    return createDom(vdom);
+function mountFunctionComponent(vdom) {
+    let {type: fnComponent, props} = vdom;
+    let renderVdom = fnComponent(props);
+    vdom.__proto__.oldRenderVdom = renderVdom;
+    return createDom(renderVdom);
 
 }
-function mountClassComponent (CComponent, props) {
+function mountClassComponent (vdom) {
+    let {type: CComponent, props} = vdom
     var instance = new CComponent(props);
-    var vdom = instance.render();
-    return createDom(vdom);
+    var renderVdom = instance.render();
+    instance.__proto__.oldRenderVdom = renderVdom;
+    vdom.__proto__.classInstance = instance;
+    return createDom(renderVdom);
 }
 function render(vdom, container) {
     mounted(vdom, container);
 }
 function mounted(vdom, container) {
     container.appendChild(createDom(vdom));
+}
+// 根据虚拟dom获取真实dom
+export function findDom (vdom) {
+    if (!vdom) {
+        return null;
+    }
+    if (!vdom.dom) {
+        // 类组件和函数组件没有直接绑定真实dom 需要不断向下遍历到正常节点后获取真实dom节点
+        vdom = vdom.classInstance ? vdom.classInstance.oldRenderVdom : vdom.oldRenderVdom;
+        return findDom(vdom);
+    }
+    return vdom.dom;
+}
+export function compareTwoVdom(parentNode, oldVdom, newVdom) {
+    let oldDom = findDom(oldVdom);
+    let newDom = createDom(newVdom);
+    oldDom.parentNode.replaceChild(newDom, oldDom);
 }
 const ReactDOM = {
     render,
