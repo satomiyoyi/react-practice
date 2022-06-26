@@ -1,8 +1,28 @@
-
-// import ReactDOM from 'react-dom';
-// import React from 'react';
-import React from './react';
 import ReactDOM from './react-dom';
+import React from './react';
+class CComponent extends React.Component {
+    constructor(props) {
+        super(props);
+        this.state = {
+            number: 0,
+        };
+    }
+    handleClick() {
+        this.setState({
+            number: this.state.number + 1,
+        });
+    }
+    render() {
+        return (
+            <div>
+                <p>{this.state.number}</p>
+                <button onClick={() => this.handleClick()}>add</button>
+            </div>
+        );
+    }
+}
+// import React from './react';
+// import ReactDOM from './react-dom';
 // let element = <h1 className='a' style={{color: 'red'}}>aaa<span>ccc</span></h1>
 // ReactDOM.render(element, document.getElementById('root'));
 // 普通组件element1
@@ -24,23 +44,8 @@ import ReactDOM from './react-dom';
 //   },
 //   name: "bbb"
 // });
-class CComponent extends React.Component{
-  constructor(props) {
-    super(props)
-    this.props = props;
-  }
-  render() {
-    return <h3 style={this.props.style}>{this.props.name}</h3>
-  }
-}
-// let element3 = <CComponent style={{color: 'red'}} name="cccc"></CComponent>
-let element3 = React.createElement(CComponent, {
-  style: {
-    color: 'red'
-  },
-  name: "cccc"
-});
-console.log(element3);
+// let element3 = <CComponent></CComponent>
+let element3 = React.createElement(CComponent, null);
 ReactDOM.render(element3, document.getElementById('root'));
 // 这里的实现是将babel转化成的React.createElement后的逻辑进行实现。
 // 输入

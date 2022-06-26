@@ -9,7 +9,11 @@ function updateProps(dom, props) {
             for (let styleKey of Object.keys(styleObj)) {
                 dom.style[styleKey] = styleObj[styleKey];
             }
-        } else {
+        } else if (/^on[A-Z].*/.test(key)) {
+            // onClick 等事件绑定
+            dom[key.toLowerCase()] = props[key];
+        }
+         else {
             dom[key] = props[key];
         }
     }
@@ -61,7 +65,8 @@ function createDom(vdom) {
     }
     if (props) {
         updateProps(dom, props);
-        if (props.children) {
+        // number 0情况
+        if (props.children !== undefined) {
             addChildrenDom(dom, props.children);
         }
     }
