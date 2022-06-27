@@ -1,4 +1,18 @@
 import {compareTwoVdom, findDom}from './react-dom';
+// 批量更新 要有标识标记当前更新操作执行之前
+// 所有的setState操作回调进行累加
+export let updateQueue = {
+    isBathingUpdate: false,
+    updater: new Set(),
+    batchUpdate() {
+        // 批量存储后的最终触发
+        updateQueue.isBathingUpdate = false;
+        for (let updater of updateQueue.updater) {
+            updater.updateComponent();
+        }
+        updateQueue.updater.clear();
+    }
+}
 class Updater {
     constructor(classInstance) {
         this.classInstance = classInstance;
@@ -11,7 +25,15 @@ class Updater {
     }
     emitUpdate() {
         // 触发组件更新
-        this.updateComponent();
+        // this.updateComponent();
+        // 批量更新
+        if (updateQueue.isBathingUpdate) {
+            // 存储当前实例 在setState中不进行真正的更新操作
+            updateQueue.updater.add(this);
+        }
+        else {
+            this.updateComponent();
+        }
     }
     getState() {
         let { classInstance, penddingStates } = this;

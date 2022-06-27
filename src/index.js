@@ -4,13 +4,18 @@ class CComponent extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
-            number: 0,
+            number: 0
         };
     }
     handleClick() {
         this.setState({
-            number: this.state.number + 1,
+            number: this.state.number + 1
         });
+        console.log(this.state.number);
+        this.setState({
+            number: this.state.number + 1
+        });
+        console.log(this.state.number);
     }
     render() {
         return (
@@ -44,7 +49,7 @@ class CComponent extends React.Component {
 //   },
 //   name: "bbb"
 // });
-// let element3 = <CComponent></CComponent>
+// let element3 = <CComponent></CComponent>;
 let element3 = React.createElement(CComponent, null);
 ReactDOM.render(element3, document.getElementById('root'));
 // 这里的实现是将babel转化成的React.createElement后的逻辑进行实现。

@@ -1,5 +1,6 @@
 import { REACT_TEXT } from './element';
 import {wrapVdom} from './tool';
+import {addEvent} from './event';
 function updateProps(dom, props) {
     for (let key of Object.keys(props)) {
         if (key === 'children') {
@@ -11,7 +12,9 @@ function updateProps(dom, props) {
             }
         } else if (/^on[A-Z].*/.test(key)) {
             // onClick 等事件绑定
-            dom[key.toLowerCase()] = props[key];
+            // dom[key.toLowerCase()] = props[key];
+            // 批量更新时使用事件冒泡绑定到document上
+            addEvent(dom, key.toLowerCase(), props[key]);
         }
          else {
             dom[key] = props[key];
