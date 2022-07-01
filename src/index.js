@@ -19,7 +19,7 @@ class CComponent extends React.Component {
     }
     render() {
         return (
-            <div>
+            <div onClick={() => {console.log('divclick')}}>
                 <p>{this.state.number}</p>
                 <button onClick={() => this.handleClick()}>add</button>
             </div>

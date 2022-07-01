@@ -12,7 +12,7 @@ export let updateQueue = {
         }
         updateQueue.updater.clear();
     }
-}
+};
 class Updater {
     constructor(classInstance) {
         this.classInstance = classInstance;
