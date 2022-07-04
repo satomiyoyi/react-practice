@@ -1,5 +1,5 @@
 
-import {REACT_ELEMENT} from './element';
+import {REACT_ELEMENT, REACT_FORWARD_REF} from './element';
 import {wrapVdom} from './tool';
 import {Component} from './component';
 function createElement(type, config, children) {
@@ -23,8 +23,27 @@ function createElement(type, config, children) {
     }
     
 }
+// 创建ref
+function createRef() {
+    return {
+        current: null
+    };
+}
+// 函数组件使用ref 必要包裹
+function forwardRef(fnComponent) {
+    // {
+    // $$typeof: Symbol(react.forward_ref)
+    // render: ƒ SubFComponent(props, ref)
+    // }
+    return {
+        $$typeof:REACT_FORWARD_REF,
+        render: fnComponent
+    }
+}
 const React = {
     createElement,
-    Component
+    Component,
+    createRef,
+    forwardRef
 };
 export default React;

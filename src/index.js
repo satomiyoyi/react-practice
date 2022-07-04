@@ -1,31 +1,55 @@
 import ReactDOM from './react-dom';
 import React from './react';
+class SubCComponent extends React.Component {
+    constructor(props) {
+        super(props);
+        this.input = React.createRef();
+    }
+    onFocusCallback() {
+        this.input.current.focus();
+    }
+
+    render() {
+        return (<input type="text" ref={this.input}/>);
+    }
+    
+}
+function SubFComponent(props, ref) {
+    return <input ref={ref} type="text"/>
+}
+let FnComponentForward = React.forwardRef(SubFComponent);
+// console.log(FnComponentForward);
+// console.log(<FnComponentForward></FnComponentForward>);
+// console.log(<SubFComponent></SubFComponent>)
+
 class CComponent extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
             number: 0
         };
+        this.inputRef = React.createRef();
     }
     handleClick() {
-        this.setState({
-            number: this.state.number + 1
-        });
-        console.log(this.state.number);
-        this.setState({
-            number: this.state.number + 1
-        });
-        console.log(this.state.number);
+        // this.inputRef.current.focus();
+        // this.inputRef.current指向sub类组件实例 调用该实例上的方法
+        // this.inputRef.current.onFocusCallback();
+        // this.inputRef 通过foward的形式直接获取到 函数组件dom本身
+        this.inputRef.current.focus();
     }
+    
     render() {
         return (
-            <div onClick={() => {console.log('divclick')}}>
-                <p>{this.state.number}</p>
-                <button onClick={() => this.handleClick()}>add</button>
+            <div>
+                {/* <input type="text" ref={this.inputRef}></input> */}
+                {/* <SubCComponent ref={this.inputRef}></SubCComponent> */}
+                <FnComponentForward ref={this.inputRef}></FnComponentForward>
+                <button onClick={() => this.handleClick()}>focus</button>
             </div>
         );
     }
 }
+
 // import React from './react';
 // import ReactDOM from './react-dom';
 // let element = <h1 className='a' style={{color: 'red'}}>aaa<span>ccc</span></h1>

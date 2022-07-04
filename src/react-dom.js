@@ -1,4 +1,4 @@
-import { REACT_TEXT } from './element';
+import { REACT_TEXT,REACT_FORWARD_REF } from './element';
 import {wrapVdom} from './tool';
 import {addEvent} from './event';
 function updateProps(dom, props) {
@@ -41,14 +41,14 @@ function createDom(vdom) {
     //     key: null
     //     props: {className: 'a', style: {…}, children: 'aaa'}
     //     ref: null
-    //     type: "h1"
+    //     type: "h1" || type: ƒ SubFComponent(props, ref)
     //     _owner: null
     //     _store: {validated: false}
     //     _self: undefined
     //     _source: {fileName: '/Users/xulin06/Project/learnReact/my-practice/src/index.js', lineNumber: 4, columnNumber: 15}
     //     [[Prototype]]: Object
     // }
-    let { type, props } = vdom;
+    let { type, props, ref } = vdom;
     let dom;
     // 我们自己实现的文本节点是额外包裹了一层 {type: REACT_TEXT, props: 'aaa'}
     if (type === REACT_TEXT) {
@@ -65,6 +65,16 @@ function createDom(vdom) {
         // 函数组件
         return mountFunctionComponent(vdom);
     }
+    else if (typeof type === 'object' && type.$$typeof === REACT_FORWARD_REF && type.render) {
+        // 这样实现是可以的，因为render是函数确实是走类似函数组件的逻辑
+        // 但是分开实现会更好些
+        // return mountFunctionComponent({
+        //     type: type.render,
+        //     props,
+        //     ref
+        // });
+        return mountForwardComponent(vdom);
+    }
     if (props) {
         updateProps(dom, props);
         // number 0情况
@@ -74,6 +84,10 @@ function createDom(vdom) {
     }
     // 为了通过虚拟dom获取真实dom时候可以获取都所以新增dom属性
     vdom.__proto__.dom = dom;
+    if (ref) {
+        // ref.current 指向真实dom
+        ref.current = dom;
+    }
     return dom;
 }
 function mountFunctionComponent(vdom) {
@@ -83,12 +97,24 @@ function mountFunctionComponent(vdom) {
     return createDom(renderVdom);
 
 }
-function mountClassComponent (vdom) {
-    let {type: CComponent, props} = vdom
+function mountForwardComponent(vdom) {
+    let {type, props, ref} = vdom;
+    let fn = type.render;
+    if (!fn) {
+        return null;
+    }
+    let renderVdom = fn(props, ref);
+    vdom.__proto__.oldRenderVdom = renderVdom;
+    return createDom(renderVdom);
+}
+function mountClassComponent(vdom) {
+    let {type: CComponent, props, ref} = vdom;
     var instance = new CComponent(props);
     var renderVdom = instance.render();
     instance.__proto__.oldRenderVdom = renderVdom;
     vdom.__proto__.classInstance = instance;
+    // ref 指向类组件实例
+    ref && (ref.current = instance);
     return createDom(renderVdom);
 }
 function render(vdom, container) {
@@ -98,7 +124,7 @@ function mounted(vdom, container) {
     container.appendChild(createDom(vdom));
 }
 // 根据虚拟dom获取真实dom
-export function findDom (vdom) {
+export function findDom(vdom) {
     if (!vdom) {
         return null;
     }
@@ -115,6 +141,6 @@ export function compareTwoVdom(parentNode, oldVdom, newVdom) {
     oldDom.parentNode.replaceChild(newDom, oldDom);
 }
 const ReactDOM = {
-    render,
+    render
 };
 export default ReactDOM;
